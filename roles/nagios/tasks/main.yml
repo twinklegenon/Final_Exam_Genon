@@ -1,0 +1,220 @@
+#ubuntu
+- name: Installing nagios dependencies and libraries
+  tags: dependecies, libraries
+  apt:
+    name:
+      - autoconf
+      - gcc
+      - libc6
+      - make
+      - wget
+      - unzip
+      - apache2
+      - libapache2-mod-php7.4
+      - libgd-dev
+      - openssl
+      - libssl-dev
+      - autoconf
+      - gcc
+      - libc6
+      - libmcrypt-dev
+      - make
+      - bc
+      - gawk
+      - dc
+      - build-essential
+      - snmp
+      - libnet-snmp-perl
+      - gettext
+      - python3-pip
+      - python3
+    state: latest
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install passlib python pckg
+  pip:
+    name: passlib
+  when: ansible_distribution == "Ubuntu"
+
+- name: Creating a directory named nagios
+  file:
+    path: ~/nagios
+    state: directory
+  when: ansible_distribution == "Ubuntu"
+
+- name: Download nagios
+  unarchive:
+    src: https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.4.6.tar.gz
+    dest: ~/nagios
+    remote_src: yes
+    mode: 0755
+    owner: root
+    group: root
+  when: ansible_distribution == "Ubuntu"
+
+- name: Setting the nagios
+  shell:
+    cd ~/nagios/nagioscore-*
+    sudo ./configure --with-httpd-conf=/etc/apache2/sites-enabled
+    sudo make all
+    sudo make install-groups-users
+    sudo usermod -a -G nagios www-data
+    sudo make install
+    sudo make install-daemoninit
+    sudo make install-commandmode
+    sudo make install-config
+    sudo make install-webconf
+    sudo a2enmod rewrite
+    sudo a2enmod cgi
+  when: ansible_distribution == "Ubuntu"
+
+- name: download nagios plugins
+  unarchive:
+    src: https://github.com/nagios-plugins/nagios-plugins/archive/release-2.3.3.tar.gz
+    dest: ~/nagios
+    remote_src: yes
+    mode: 0755
+    owner: root
+    group: root
+  when: ansible_distribution == "Ubuntu"
+
+- name: installing nagios plugins
+  shell:
+    cd ~/nagios/nagios-plugins*
+    ./tools/setup
+    ./configure
+    make
+    make install
+  when: ansible_distribution == "Ubuntu"
+
+- name: create user and pass
+  community.general.htpasswd:
+    path: /usr/local/nagios/etc/htpasswd.users
+    name: nagiosadmin
+    password: Yaj159159
+  when: ansible_distribution == "Ubuntu"
+
+#- name: start and enable nagios
+#  service:
+#    name: nagios
+#    state: restarted
+#    enabled: true
+#  when: ansible_distribution == "Ubuntu"
+  
+#- name: start and enable httpd
+#  service: 
+#    name: apache2
+#    state: restarted
+#    enabled: true
+#  when: ansible_distribution == "Ubuntu"
+
+#centos
+#centos
+#centos
+- name: Installing nagios dependencies and libraries
+  tags: dependecies, libraries
+  yum:
+    name:
+      - gcc
+      - glibc
+      - glibc-common
+      - perl
+      - httpd
+      - php
+      - wget
+      - gd
+      - gd-devel
+      - openssl-devel
+      - gcc
+      - glibc
+      - glibc-common
+      - make
+      - gettext
+      - automake
+      - autoconf
+      - wget
+      - openssl-devel
+      - net-snmp-utils
+      - python2-pip
+    state: latest
+  when: ansible_distribution == "CentOS"
+
+- name: Install passlib python pckg
+  pip:
+    name: passlib
+  when: ansible_distribution == "CentOS"
+
+- name: Creating a directory named nagios
+  file:
+    path: ~/nagios
+    state: directory
+  when: ansible_distribution == "CentOS"
+
+- name: Download nagios
+  unarchive:
+    src: https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.4.6.tar.gz
+    dest: ~/nagios
+    remote_src: yes
+    mode: 0777
+    owner: root
+    group: root
+  when: ansible_distribution == "CentOS"
+
+- name: install nagios and compiling it
+  shell:
+    cd ~/nagios/nagioscore-**
+    ./configure
+    make all
+    make install-groups-users
+    usermod -a -G nagios apache
+    make install
+    make install-daemoninit
+    make install-commandmode
+    make install-config
+    make install-webconf
+  when: ansible_distribution == "CentOS"
+
+- name: downlaod nagios and exract it
+  unarchive:
+    src: https://github.com/nagios-plugins/nagios-plugins/archive/release-2.3.3.tar.gz
+    dest: ~/nagios
+    remote_src: yes
+    mode: 0777
+    owner: root
+    group: root
+  when: ansible_distribution == "CentOS"
+
+- name: Install nagios plugins
+  shell:
+    cd ~/nagios/nagios-plugins*
+    ./tools/setup
+    ./configure
+    make
+    make install
+  when: ansible_distribution == "CentOS"
+
+- name: Create user and pass file
+  community.general.htpasswd:
+    path: /usr/local/nagios/etc/htpasswd.users
+    name: nagiosadmin
+    password: Yaj159159
+  when: ansible_distribution == "CentOS"
+
+- name: install nagios4-core
+  apt:
+    name: nagios4-core
+  when: ansible_distribution == "Ubuntu"
+
+- name: start and enable nagios
+  service:
+    name: nagios
+    state: restarted
+    enabled: true
+  when: ansible_distribution == "CentOS"
+  
+- name: start and enable httpd
+  service:
+    name: httpd
+    state: restarted
+    enabled: true
+  when: ansible_distribution == "CentOS"

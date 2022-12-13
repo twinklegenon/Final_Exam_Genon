@@ -1,0 +1,32 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: update repository index (CentOS)
+    tags: always
+    dnf:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution == "CentOS"
+
+  - name: update repository index (Ubuntu)
+    tags: always
+    apt:
+      update_cache: yes
+    changed_when: yes
+    when: ansible_distribution == "Ubuntu"
+
+  - name: changing the motd on Ubuntu
+    shell: sudo sh -c 'echo "Ansible Managed by Twinkle" > /etc/motd'
+    when: ansible_distribution == "Ubuntu"
+
+  - name: changing the motd on CentOS
+    shell: sudo sh -c 'echo "Ansible Managed by Twinkle" > /etc/motd'
+    when: ansible_distribution == "CentOS"
+
+- hosts: my_servers
+  become: true
+  roles:
+#    - nagios
+    - apache
